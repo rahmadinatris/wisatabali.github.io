@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="stylesheet" href="css/leaflet.css" />
+    <link rel="stylesheet" href="css/L.Control.Locate.min.css" />
+    <link rel="stylesheet" href="css/qgis2web.css" />
+    <link rel="stylesheet" href="css/fontawesome-all.min.css" />
+    <link rel="stylesheet" href="css/leaflet-search.css" />
+    <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css" />
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+
+      .leaflet-popup-content > table img {
+        width: 300px;
+      }
+    </style>
+    <title>PETA WISATA PROVINSI BALI</title>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src="js/qgis2web_expressions.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/L.Control.Locate.min.js"></script>
+    <script src="js/leaflet-svg-shape-markers.min.js"></script>
+    <script src="js/leaflet.rotatedMarker.js"></script>
+    <script src="js/leaflet.pattern.js"></script>
+    <script src="js/leaflet-hash.js"></script>
+    <script src="js/Autolinker.min.js"></script>
+    <script src="js/rbush.min.js"></script>
+    <script src="js/labelgun.min.js"></script>
+    <script src="js/labels.js"></script>
+    <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+    <script src="js/leaflet-search.js"></script>
+    <script src="data/ADMINISTRASIDESA_AR_2.js"></script>
+    <script src="data/Pariwisata_3.js"></script>
+    <script>
+      var highlightLayer;
+      function highlightFeature(e) {
+        highlightLayer = e.target;
+
+        if (e.target.feature.geometry.type === "LineString") {
+          highlightLayer.setStyle({
+            color: "#fb9a99",
+          });
+        } else {
+          highlightLayer.setStyle({
+            fillColor: "#fb9a99",
+            fillOpacity: 1,
+          });
+        }
+      }
+      var map = L.map("map", {
+        zoomControl: true,
+        maxZoom: 28,
+        minZoom: 1,
+      });
+      var hash = new L.Hash(map);
+      map.attributionControl.setPrefix(
+        '<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>'
+      );
+      var autolinker = new Autolinker({ truncate: { length: 30, location: "smart" } });
+      L.control.locate({ locateOptions: { maxZoom: 19 } }).addTo(map);
+      var bounds_group = new L.featureGroup([]);
+      function setBounds() {
+        if (bounds_group.getLayers().length) {
+          map.fitBounds(bounds_group.getBounds());
+        }
+        map.setMaxBounds(map.getBounds());
+      }
+      map.createPane("pane_googlesatelit_0");
+      map.getPane("pane_googlesatelit_0").style.zIndex = 400;
+      var layer_googlesatelit_0 = L.tileLayer("https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+        pane: "pane_googlesatelit_0",
+        opacity: 1.0,
+        attribution: "",
+        minZoom: 1,
+        maxZoom: 28,
+        minNativeZoom: 0,
+        maxNativeZoom: 18,
+      });
+      layer_googlesatelit_0;
+      map.addLayer(layer_googlesatelit_0);
+      map.createPane("pane_wisata_1");
+      map.getPane("pane_wisata_1").style.zIndex = 401;
+      var layer_wisata_1 = L.tileLayer("https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}", {
+        pane: "pane_wisata_1",
+        opacity: 1.0,
+        attribution: "",
+        minZoom: 1,
+        maxZoom: 28,
+        minNativeZoom: 0,
+        maxNativeZoom: 18,
+      });
+      layer_wisata_1;
+      map.addLayer(layer_wisata_1);
+      function pop_ADMINISTRASIDESA_AR_2(feature, layer) {
+        layer.on({
+          mouseout: function (e) {
+            for (i in e.target._eventParents) {
+              e.target._eventParents[i].resetStyle(e.target);
+            }
+          },
+          mouseover: highlightFeature,
+        });
+        var popupContent =
+          '<table>\
+                    <tr>\
+                        <td colspan="2"><strong> Nama Obje</strong><br />' +
+          (feature.properties[" Nama Obje"] !== null ? autolinker.link(feature.properties[" Nama Obje"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Luas Wilay</strong><br />' +
+          (feature.properties["Luas Wilay"] !== null ? autolinker.link(feature.properties["Luas Wilay"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Kelurahan</strong><br />' +
+          (feature.properties["Kelurahan"] !== null ? autolinker.link(feature.properties["Kelurahan"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Kecamatan</strong><br />' +
+          (feature.properties["Kecamatan"] !== null ? autolinker.link(feature.properties["Kecamatan"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Kabupaten/</strong><br />' +
+          (feature.properties["Kabupaten/"] !== null ? autolinker.link(feature.properties["Kabupaten/"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Provinsi</strong><br />' +
+          (feature.properties["Provinsi"] !== null ? autolinker.link(feature.properties["Provinsi"].toLocaleString()) : "") +
+          "</td>\
+                    </tr>\
+                </table>";
+        layer.bindPopup(popupContent, { maxHeight: 400 });
+      }
+
+      function style_ADMINISTRASIDESA_AR_2_0(feature) {
+        switch (String(feature.properties["Kecamatan"])) {
+          case "Denpasar Barat":
+            return {
+              pane: "pane_ADMINISTRASIDESA_AR_2",
+              opacity: 1,
+              color: "rgba(35,35,35,1.0)",
+              dashArray: "",
+              lineCap: "butt",
+              lineJoin: "miter",
+              weight: 1.0,
+              fill: true,
+              fillOpacity: 1,
+              fillColor: "rgba(80,202,96,1.0)",
+              interactive: true,
+            };
+            break;
+          case "Denpasar Selatan":
+            return {
+              pane: "pane_ADMINISTRASIDESA_AR_2",
+              opacity: 1,
+              color: "rgba(35,35,35,1.0)",
+              dashArray: "",
+              lineCap: "butt",
+              lineJoin: "miter",
+              weight: 1.0,
+              fill: true,
+              fillOpacity: 1,
+              fillColor: "rgba(205,194,35,1.0)",
+              interactive: true,
+            };
+            break;
+          case "Denpasar Timur":
+            return {
+              pane: "pane_ADMINISTRASIDESA_AR_2",
+              opacity: 1,
+              color: "rgba(35,35,35,1.0)",
+              dashArray: "",
+              lineCap: "butt",
+              lineJoin: "miter",
+              weight: 1.0,
+              fill: true,
+              fillOpacity: 1,
+              fillColor: "rgba(33,165,231,1.0)",
+              interactive: true,
+            };
+            break;
+          case "Denpasar Utara":
+            return {
+              pane: "pane_ADMINISTRASIDESA_AR_2",
+              opacity: 1,
+              color: "rgba(35,35,35,1.0)",
+              dashArray: "",
+              lineCap: "butt",
+              lineJoin: "miter",
+              weight: 1.0,
+              fill: true,
+              fillOpacity: 1,
+              fillColor: "rgba(163,117,204,1.0)",
+              interactive: true,
+            };
+            break;
+        }
+      }
+      map.createPane("pane_ADMINISTRASIDESA_AR_2");
+      map.getPane("pane_ADMINISTRASIDESA_AR_2").style.zIndex = 402;
+      map.getPane("pane_ADMINISTRASIDESA_AR_2").style["mix-blend-mode"] = "normal";
+      var layer_ADMINISTRASIDESA_AR_2 = new L.geoJson(json_ADMINISTRASIDESA_AR_2, {
+        attribution: "",
+        interactive: true,
+        dataVar: "json_ADMINISTRASIDESA_AR_2",
+        layerName: "layer_ADMINISTRASIDESA_AR_2",
+        pane: "pane_ADMINISTRASIDESA_AR_2",
+        onEachFeature: pop_ADMINISTRASIDESA_AR_2,
+        style: style_ADMINISTRASIDESA_AR_2_0,
+      });
+      bounds_group.addLayer(layer_ADMINISTRASIDESA_AR_2);
+      map.addLayer(layer_ADMINISTRASIDESA_AR_2);
+      function pop_Pariwisata_3(feature, layer) {
+        layer.on({
+          mouseout: function (e) {
+            for (i in e.target._eventParents) {
+              e.target._eventParents[i].resetStyle(e.target);
+            }
+          },
+          mouseover: highlightFeature,
+        });
+        var popupContent =
+          '<table>\
+                    <tr>\
+                        <td colspan="2">' +
+          (feature.properties["No"] !== null ? autolinker.link(feature.properties["No"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Nama Wisat</th>\
+                        <td>' +
+          (feature.properties["Nama Wisat"] !== null ? autolinker.link(feature.properties["Nama Wisat"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Luas (m2)</th>\
+                        <td>' +
+          (feature.properties["Luas (m2)"] !== null ? autolinker.link(feature.properties["Luas (m2)"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Kecamatan</th>\
+                        <td>' +
+          (feature.properties["Kecamatan"] !== null ? autolinker.link(feature.properties["Kecamatan"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Alamat</th>\
+                        <td>' +
+          (feature.properties["Alamat"] !== null ? autolinker.link(feature.properties["Alamat"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Jam Buka</th>\
+                        <td>' +
+          (feature.properties["Jam Buka"] !== null ? autolinker.link(feature.properties["Jam Buka"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">HTM</th>\
+                        <td>' +
+          (feature.properties["HTM"] !== null ? autolinker.link(feature.properties["HTM"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Keterangan</th>\
+                        <td>' +
+          (feature.properties["Keterangan"] !== null ? autolinker.link(feature.properties["Keterangan"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Y</th>\
+                        <td>' +
+          (feature.properties["Y"] !== null ? autolinker.link(feature.properties["Y"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">X</th>\
+                        <td>' +
+          (feature.properties["X"] !== null ? autolinker.link(feature.properties["X"].toLocaleString()) : "") +
+          '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Foto</strong><br />' +
+          (feature.properties["Foto"] !== null
+            ? '<img src="images/' +
+              String(feature.properties["Foto"])
+                .replace(/[\\\/:]/g, "_")
+                .trim() +
+              '">'
+            : "") +
+          "</td>\
+                    </tr>\
+                </table>";
+        layer.bindPopup(popupContent, { maxHeight: 400 });
+      }
+
+      function style_Pariwisata_3_0() {
+        return {
+          pane: "pane_Pariwisata_3",
+          shape: "diamond",
+          radius: 8.8,
+          opacity: 1,
+          color: "rgba(128,17,25,1.0)",
+          dashArray: "",
+          lineCap: "butt",
+          lineJoin: "miter",
+          weight: 2.0,
+          fill: true,
+          fillOpacity: 1,
+          fillColor: "rgba(217,95,95,1.0)",
+          interactive: true,
+        };
+      }
+      map.createPane("pane_Pariwisata_3");
+      map.getPane("pane_Pariwisata_3").style.zIndex = 403;
+      map.getPane("pane_Pariwisata_3").style["mix-blend-mode"] = "normal";
+      var layer_Pariwisata_3 = new L.geoJson(json_Pariwisata_3, {
+        attribution: "",
+        interactive: true,
+        dataVar: "json_Pariwisata_3",
+        layerName: "layer_Pariwisata_3",
+        pane: "pane_Pariwisata_3",
+        onEachFeature: pop_Pariwisata_3,
+        pointToLayer: function (feature, latlng) {
+          var context = {
+            feature: feature,
+            variables: {},
+          };
+          return L.shapeMarker(latlng, style_Pariwisata_3_0(feature));
+        },
+      });
+      bounds_group.addLayer(layer_Pariwisata_3);
+      map.addLayer(layer_Pariwisata_3);
+      var title = new L.Control();
+      title.onAdd = function (map) {
+        this._div = L.DomUtil.create("div", "info");
+        this.update();
+        return this._div;
+      };
+      title.update = function () {
+        this._div.innerHTML = "<h2>PETA WISATA PROVINSI BALI</h2>";
+      };
+      title.addTo(map);
+      var abstract = new L.Control({ position: "bottomleft" });
+      abstract.onAdd = function (map) {
+        this._div = L.DomUtil.create("div", "leaflet-control abstract");
+        this._div.id = "abstract";
+
+        abstract.show();
+        return this._div;
+      };
+      abstract.show = function () {
+        this._div.classList.remove("abstract");
+        this._div.classList.add("abstractUncollapsed");
+        this._div.innerHTML = "Peta ini menyajikan informasi terkait wisata yang ada di Provinsi Bali terkhusus kota Denpasar.";
+      };
+      abstract.addTo(map);
+      var osmGeocoder = new L.Control.Geocoder({
+        collapsed: true,
+        position: "topleft",
+        text: "Search",
+        title: "Testing",
+      }).addTo(map);
+      document.getElementsByClassName("leaflet-control-geocoder-icon")[0].className += " fa fa-search";
+      document.getElementsByClassName("leaflet-control-geocoder-icon")[0].title += "Search for a place";
+      var baseMaps = {};
+      L.control
+        .layers(
+          baseMaps,
+          {
+            '<img src="legend/Pariwisata_3.png" /> Pariwisata': layer_Pariwisata_3,
+            'ADMINISTRASIDESA_AR<br /><table><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_2_DenpasarBarat0.png" /></td><td>Denpasar Barat</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_2_DenpasarSelatan1.png" /></td><td>Denpasar Selatan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_2_DenpasarTimur2.png" /></td><td>Denpasar Timur</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_2_DenpasarUtara3.png" /></td><td>Denpasar Utara</td></tr></table>':
+              layer_ADMINISTRASIDESA_AR_2,
+            wisata: layer_wisata_1,
+            "google satelit": layer_googlesatelit_0,
+          },
+          { collapsed: false }
+        )
+        .addTo(map);
+      setBounds();
+      map.addControl(
+        new L.Control.Search({
+          layer: layer_Pariwisata_3,
+          initial: false,
+          hideMarkerOnCollapse: true,
+          propertyName: "Nama Wisat",
+        })
+      );
+      document.getElementsByClassName("search-button")[0].className += " fa fa-binoculars";
+    </script>
+  </body>
+</html>
